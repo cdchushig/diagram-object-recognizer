@@ -17,23 +17,16 @@ RUN apt-get update && apt-get install -y \
 
 #ENV PATH="/home/appuser/.local/bin:${PATH}"
 
-#RUN pip install --user 'git+https://github.com/facebookresearch/fvcore'
-#RUN git clone https://github.com/facebookresearch/detectron2 detectron2_repo
-#RUN pip install --user -e detectron2_repo
-
 ADD . /code
 WORKDIR /code
 
+RUN pip3 install --upgrade pip
 RUN pip3 install -r requirements.txt
+RUN git clone https://github.com/facebookresearch/detectron2 detectron2_repo
+RUN pip3 install -e detectron2_repo
 
-# Set a fixed model cache directory.
-ENV FVCORE_CACHE="/tmp"
-WORKDIR /home/appuser/detectron2_repo
 ENV PILLOW_VERSION=7.0.0
 
-COPY . /home/appuser/detectron2_repo
-
-# Make port 8080 available to the world outside the container
 ENV PORT 8080
 EXPOSE 8080
 
