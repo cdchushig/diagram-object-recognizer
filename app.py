@@ -1,11 +1,12 @@
-from detector import Detector
+import os
 import io
+import numpy as np
+from detector import Detector
 from flask import Flask, render_template, request, send_from_directory, send_file, abort
 from PIL import Image
 import requests
-import os
 from werkzeug.utils import secure_filename
-from pdf2image import convert_from_path, convert_from_bytes
+import base64
 
 
 app = Flask(__name__)
@@ -31,9 +32,40 @@ def run_inference(img_path='file.jpg'):
     return result_img, dict_nodes
 
 
+def save_image_to_local(img_bytes, diagram_name):
+    path_diagram = app.config['UPLOAD_PATH'] + '/' + diagram_name
+    img_bytes.save(path_diagram)
+
+
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/api/v1/detect", methods=['POST', 'GET'])
+def detect():
+    if not request.json or 'image' not in request.json:
+        abort(400)
+
+    # get the base64 encoded string
+    im_b64 = request.json['image']
+    diagram_name = request.json['diagram_name']
+
+    # convert it into bytes
+    img_bytes = base64.b64decode(im_b64.encode('utf-8'))
+
+    # convert bytes data to PIL Image object
+    img = Image.open(io.BytesIO(img_bytes))
+
+    # PIL image object to numpy array
+    img_arr = np.asarray(img)
+    print('img shape', img_arr.shape)
+
+    save_image_to_local(img, diagram_name)
+
+    result_img, dict_nodes = run_inference(os.path.join(app.config['UPLOAD_PATH'], diagram_name))
+
+    return dict_nodes
 
 
 @app.route("/detect", methods=['POST', 'GET'])
@@ -45,9 +77,6 @@ def upload():
         file_ext = os.path.splitext(filename)[1]
         if file_ext not in app.config['UPLOAD_EXTENSIONS']:
             abort(400)
-        elif file_ext == '.pdf':
-            uploaded_file = convert_from_bytes(uploaded_file)
-
         uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
 
     result_img, dict_nodes = run_inference(os.path.join(app.config['UPLOAD_PATH'], filename))

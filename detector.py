@@ -28,11 +28,11 @@ class Detector:
 		self.cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7
 		self.cfg.MODEL.DEVICE = "cpu"
 
-	def inference(self, file):
+	def inference(self, img_file):
 
 		logger.info("inference")
 		predictor = DefaultPredictor(self.cfg)
-		im = cv.imread(file)
+		im = cv.imread(img_file)
 		outputs = predictor(im)
 
 		# with open(self.curr_dir+'/data.txt', 'w') as fp:
@@ -46,8 +46,6 @@ class Detector:
 		# visualise
 		v = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.2)
 		v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-
-		print(outputs['instances'])
 
 		class_names = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]).thing_classes
 		pred_class_names = list(map(lambda x: class_names[x], outputs['instances'].pred_classes))
