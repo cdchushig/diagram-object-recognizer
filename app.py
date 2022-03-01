@@ -12,7 +12,7 @@ import base64
 app = Flask(__name__)
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif', 'pdf']
 app.config['UPLOAD_PATH'] = 'uploads'
-app.config['UPLOAD_SHOW_IMG'] = False
+app.config['UPLOAD_SHOW_IMG'] = True
 
 detector = Detector()
 
