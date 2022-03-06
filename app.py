@@ -2,7 +2,7 @@ import os
 import io
 import numpy as np
 from detector import Detector
-from flask import Flask, render_template, request, send_from_directory, send_file, abort
+from flask import Flask, render_template, request, send_file, abort
 from PIL import Image
 import requests
 from werkzeug.utils import secure_filename
