@@ -20,5 +20,4 @@ Access to console of container:
 docker run -it flask_diagram
 ```
 
-
 lsof -i -P -n | grep LISTEN
