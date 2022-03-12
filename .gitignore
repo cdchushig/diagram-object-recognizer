@@ -3,4 +3,5 @@ __pycache__/
 .idea/
 models/*.pth
 models/*.yml
-uploads/
+uploads/*.jpg
+uploads/*.png
