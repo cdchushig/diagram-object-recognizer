@@ -35,17 +35,13 @@ class Detector:
 		im = cv.imread(img_file)
 		outputs = predictor(im)
 
-		# with open(self.curr_dir+'/data.txt', 'w') as fp:
-		# 	json.dump(outputs['instances'], fp)
-		# 	# json.dump(cfg.dump(), fp)
-
 		# get metadata
 		MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]).thing_classes = ['actor', 'oval', 'line', 'text', 'arrow', 'system']
-		metadata = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0])
+		# metadata = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0])
 
-		# visualise
-		v = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.2)
-		v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+		# visualize
+		# v = Visualizer(im[:, :, ::-1], metadata=metadata, scale=1.2)
+		# v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
 
 		class_names = MetadataCatalog.get(self.cfg.DATASETS.TRAIN[0]).thing_classes
 		pred_class_names = list(map(lambda x: class_names[x], outputs['instances'].pred_classes))
@@ -66,7 +62,10 @@ class Detector:
 			"version": "1.0"
 		}
 
-		img = Image.fromarray(np.uint8(v.get_image()[:, :, ::-1]))
+		# img = Image.fromarray(np.uint8(v.get_image()[:, :, ::-1]))
+
 		# write to jpg
 		# cv.imwrite('img.jpg',v.get_image())
-		return img, dict_nodes
+
+		# return img, dict_nodes
+		return dict_nodes

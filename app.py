@@ -8,6 +8,13 @@ import requests
 from werkzeug.utils import secure_filename
 import base64
 
+import logging
+import coloredlogs
+
+logging.basicConfig(format='%(asctime)s - %(levelname)s - %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+coloredlogs.install(level='DEBUG', logger=logger)
+
 
 app = Flask(__name__)
 app.config['UPLOAD_EXTENSIONS'] = ['.jpg', '.png', '.gif', 'pdf']
@@ -17,22 +24,23 @@ app.config['UPLOAD_SHOW_IMG'] = True
 detector = Detector()
 
 
-def load_image_url(url):
-    response = requests.get(url)
-    img = Image.open(io.BytesIO(response.content))
-    return img
+# def load_image_url(url):
+#     response = requests.get(url)
+#     img = Image.open(io.BytesIO(response.content))
+#     return img
 
 
 def run_inference(img_path='file.jpg'):
-    result_img, dict_nodes = detector.inference(img_path)
+    dict_nodes = detector.inference(img_path)
     try:
         os.remove(img_path)
     except:
         pass
-    return result_img, dict_nodes
+    return dict_nodes
 
 
 def save_image_to_local(img_bytes, diagram_name):
+    logger.info('save image to local')
     path_diagram = app.config['UPLOAD_PATH'] + '/' + diagram_name
     img_bytes.save(path_diagram)
 
@@ -46,6 +54,8 @@ def index():
 def detect():
     if not request.json or 'image' not in request.json:
         abort(400)
+
+    logger.info('detect')
 
     # get the base64 encoded string
     im_b64 = request.json['image']
@@ -63,33 +73,33 @@ def detect():
 
     save_image_to_local(img, diagram_name)
 
-    result_img, dict_nodes = run_inference(os.path.join(app.config['UPLOAD_PATH'], diagram_name))
+    dict_nodes = run_inference(os.path.join(app.config['UPLOAD_PATH'], diagram_name))
 
     return dict_nodes
 
 
-@app.route("/detect", methods=['POST', 'GET'])
-def upload():
-
-    uploaded_file = request.files['file']
-    filename = secure_filename(uploaded_file.filename)
-    if filename != '':
-        file_ext = os.path.splitext(filename)[1]
-        if file_ext not in app.config['UPLOAD_EXTENSIONS']:
-            abort(400)
-        uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-
-    result_img, dict_nodes = run_inference(os.path.join(app.config['UPLOAD_PATH'], filename))
-
-    if app.config['UPLOAD_SHOW_IMG']:
-        file_object = io.BytesIO()
-        result_img.save(file_object, 'PNG')
-        file_object.seek(0)
-        return send_file(file_object, mimetype='image/PNG')
-    else:
-        return dict_nodes
+# @app.route("/detect", methods=['POST', 'GET'])
+# def upload():
+#
+#     uploaded_file = request.files['file']
+#     filename = secure_filename(uploaded_file.filename)
+#     if filename != '':
+#         file_ext = os.path.splitext(filename)[1]
+#         if file_ext not in app.config['UPLOAD_EXTENSIONS']:
+#             abort(400)
+#         uploaded_file.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+#
+#     result_img, dict_nodes = run_inference(os.path.join(app.config['UPLOAD_PATH'], filename))
+#
+#     if app.config['UPLOAD_SHOW_IMG']:
+#         file_object = io.BytesIO()
+#         result_img.save(file_object, 'PNG')
+#         file_object.seek(0)
+#         return send_file(file_object, mimetype='image/PNG')
+#     else:
+#         return dict_nodes
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get('FLASK_PORT', 8080))
+    app.run(debug=os.environ.get("FLASK_DEBUG", False), host=os.environ.get("FLASK_HOST", '0.0.0.0'), port=port)
