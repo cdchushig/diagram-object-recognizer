@@ -2,8 +2,15 @@ version: '3'
 
 services:
     web:
-        build: .
+#        build:
+#            context: .
+#            dockerfile: Dockerfile
+        image: flask_diagram
+        container_name: flask_diagram_app
         ports:
             - "8080:8080"
-        depends_on:
-            - redis
+        volumes:
+            - .:/app/
+        command: bash -c "python app.py"
+        env_file:
+          - .env
