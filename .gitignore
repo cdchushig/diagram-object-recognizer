@@ -2,6 +2,5 @@ micro-detectron2/mode_final.pth
 __pycache__/
 .idea/
 models/*.pth
-models/*.yml
 uploads/*.jpg
 uploads/*.png
