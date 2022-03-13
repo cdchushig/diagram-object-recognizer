@@ -18,6 +18,7 @@ docker run -p 8080:8080 -d flask_diagram
 Access to console of container:
 ```shell script
 docker run -it flask_diagram
+docker run -it --name devtest -v "$(pwd)"/models:/home/appuser/models flask_diagram:latest
 ```
 
 lsof -i -P -n | grep LISTEN

@@ -10,7 +10,7 @@ services:
         ports:
             - "8080:8080"
         volumes:
-            - models:/home/appuser/models/
+            - ./models:/home/appuser/models/
         command: bash -c "python app.py"
         env_file:
           - .env
